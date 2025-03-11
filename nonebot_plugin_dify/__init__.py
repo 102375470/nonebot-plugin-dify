@@ -15,7 +15,7 @@ from .dify_bot import DifyBot
 from .common.reply_type import ReplyType
 from .common import memory
 from .common.utils import get_pic_from_url, save_pic
-
+import re
 
 dify_bot = DifyBot()
 
@@ -112,7 +112,7 @@ async def _(
             _uni_message += UniMessage(Image(raw=_pic_content))
         else:
             _uni_message += UniMessage(f"{_reply_content}")
-
+    _uni_message = remove_tags_content(_uni_message)
     if target.private:
         send_msg = (
                 await _uni_message.export()
@@ -123,3 +123,27 @@ async def _(
         )
 
     await recieve_message.finish(send_msg)
+
+def remove_tags_content(msg: str) -> str:
+    """移除消息中的所有<think>、<details>和<summary>标签及其内容"""
+    
+    patterns = [
+        r'<think\b[^>]*>[\s\S]*?</think>',  # 匹配 <think> 和 </think> 标签及其内容
+        r'<details\b[^>]*>[\s\S]*?</details>',  # 匹配 <details> 和 </details> 标签及其内容，包括所有属性
+        r'<summary\b[^>]*>[\s\S]*?</summary>'  # 匹配 <summary> 和 </summary> 标签及其内容，包括所有属性
+    ]
+
+    result = msg
+    iteration = 0
+    max_iterations = 10
+
+    for pattern in patterns:
+        while re.search(pattern, result) and iteration < max_iterations:
+            result = re.sub(pattern, '', result)
+            result = re.sub(r'\n\s*\n', '\n', result.strip())  # 去除多余空行
+            iteration += 1
+
+    if iteration >= max_iterations:
+        logger.warning(f"达到最大迭代次数 {max_iterations}，可能存在异常标签")
+
+    return result
