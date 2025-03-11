@@ -55,7 +55,7 @@ async def ignore_rule(event: Event) -> bool:
 
 recieve_message: type[Matcher] = on_message(
         rule=Rule(ignore_rule) & to_me(),
-        priority=99,
+        priority=999,
         block=False,
     )
 
@@ -111,8 +111,7 @@ async def _(
             _pic_content = await get_pic_from_url(_reply_content)
             _uni_message += UniMessage(Image(raw=_pic_content))
         else:
-            _uni_message += UniMessage(f"{_reply_content}")
-    _uni_message = remove_tags_content(_uni_message)
+            _uni_message += UniMessage(f"{remove_tags_content(_reply_content)}")
     if target.private:
         send_msg = (
                 await _uni_message.export()
@@ -126,6 +125,7 @@ async def _(
 
 def remove_tags_content(msg: str) -> str:
     """移除消息中的所有<think>、<details>和<summary>标签及其内容"""
+    print(msg)
     
     patterns = [
         r'<think\b[^>]*>[\s\S]*?</think>',  # 匹配 <think> 和 </think> 标签及其内容
