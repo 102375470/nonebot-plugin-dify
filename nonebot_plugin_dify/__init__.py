@@ -125,8 +125,6 @@ async def _(
 
 def remove_tags_content(msg: str) -> str:
     """移除消息中的所有<think>、<details>和<summary>标签及其内容"""
-    print(msg)
-    
     patterns = [
         r'<think\b[^>]*>[\s\S]*?</think>',  # 匹配 <think> 和 </think> 标签及其内容
         r'<details\b[^>]*>[\s\S]*?</details>',  # 匹配 <details> 和 </details> 标签及其内容，包括所有属性
